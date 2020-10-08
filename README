@@ -1,15 +1,15 @@
 Jeremy Heil
 
-Location: home/286project1
+Location: home/cs286/286project1
 
-filename: project1.zip
+filenames: project1.zip, mipssim.cpp, Instruction.cpp, Instruction.h
 
 My program is in c++ code.
 
 To compile the code type the following:
 
-    g++ mipssim.cpp
+    g++ mipssim.cpp -o mipssim
 
 To run the code type the following:
 
-    ./a.exe [filename]
+    ./mipssim [filename]
