@@ -25,11 +25,11 @@ int main(int argc, char** argv)
         Instruction instructionArray[1000];
         string fname;
         
-        if(argc > 0){
-            //string filename(argv[1]);
-            //fname = filename.substr(0, 4);
+        if(argc > 1){
+            string filename(argv[1]);
+            fname = filename.substr(0, 4);
 
-            int FD = open("test1.bin", O_RDONLY);
+            int FD = open(argv[1], O_RDONLY);
             bool b = false;
             int amt = 4;
             while( amt != 0 )
@@ -156,9 +156,9 @@ int main(int argc, char** argv)
                     Instruction::fillDataArray(dataArray);
 
                      ofstream outputFile;
-                    //fname += "_dis.txt";
-                    //const char* openFile = fname.c_str();
-                    outputFile.open("test1_dis.txt");
+                    fname += "_dis.txt";
+                    const char* openFile = fname.c_str();
+                    outputFile.open(openFile);
                     for(string line : lines){
                         outputFile << line << endl;
                     }
@@ -169,7 +169,10 @@ int main(int argc, char** argv)
                     int count = 1;
                     string printString = "";
                     ofstream outFile;
-                    outFile.open("test1_sim.txt");
+                    fname = filename.substr(0, 4);
+                    fname += "_sim.txt";
+                    openFile = fname.c_str();
+                    outFile.open(openFile);
                         for (int i = 100; i < 300; i += 4)
                         {
                             try
