@@ -8,6 +8,7 @@ using namespace std;
 class Instruction{
 
 private:
+    string printString;
     int address;
     string name;
     string printText;
@@ -43,7 +44,7 @@ public:
 
     int execute();
 
-    void print(int cycle, int address);
+    string print(int cycle, int address);
 
     string getName();
 
