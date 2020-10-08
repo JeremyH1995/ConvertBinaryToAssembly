@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <bitset>
 #include "Instruction.cpp"
 
 using namespace std;
@@ -41,7 +42,7 @@ int main(int argc, char** argv)
                             iPtr[1] = buffer[2];
                             iPtr[2] = buffer[1];
                             iPtr[3] = buffer[0];
-                        string binary = to_string(i);
+                        
                         int validBit = (((unsigned int)i)>>31);
                         int opcode = (((unsigned int)i)>>26);
                         int rs =  ((((unsigned int)i)<<6)>>27);
@@ -49,11 +50,10 @@ int main(int argc, char** argv)
                         int rd = ((((unsigned int)i)<<16)>>27);
                         int sa = ((((unsigned int)i)<<21)>>27);
                         int functioncode = ((((unsigned int)i)<<26)>>26);
-                        int jumpVal = ((((unsigned int)i)<<6)>>26) * 4;
+                        int jumpVal = ((((unsigned int)i)<<6)>>6) * 4;
                         int imm = ((((unsigned int)i)<<16)>>16);
-                        cout << to_string(validBit) <<endl;
-                        cout << to_string(opcode) << endl;
-
+                        string binary = bitset<1>(validBit).to_string() + " " + bitset<5>(opcode).to_string() + " " + bitset<5>(rs).to_string() + " " + bitset<5>(rt).to_string() + " " + bitset<5>(rd).to_string() + " " + bitset<5>(sa).to_string() + " " + bitset<6>(functioncode).to_string() + "\t";
+                        string binaryNospace = bitset<32>(i).to_string();
                             if(validBit == 1){
                                 if(functioncode == 13 && opcode == 32){
                                     b = true;
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
                                 text = "Invalid Instruction";
                             }
                             
-                            lines[lineCount++] = binary + "\t" + to_string(pc) + "\t" + text;
+                            lines[lineCount++] = binary + to_string(pc) + "\t" + text;
                             pc += 4;
                             if(b == true){
                                 int value = 0;
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
                                         iPtr[3] = buffer[0];
                                         value = (int)i;
                                         dataArray[valueCount++] = value;
-                                        lines[lineCount++] = binary + "\t" + to_string(pc) + "\t" + to_string((signed int)i);
+                                        lines[lineCount++] = binaryNospace + "\t" + to_string(pc) + "\t" + to_string(value);
                                         pc += 4;
                                     }
                                 }
@@ -171,7 +171,7 @@ int main(int argc, char** argv)
                                     instructionArray[i].print(count, i);
                                     count++;
                                     if(address != 0){
-                                        i = address;
+                                        i = address - 4;
                                         address = 0;
                                     }
                                 }
