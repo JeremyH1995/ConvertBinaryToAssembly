@@ -90,7 +90,7 @@ using namespace std;
         }
         else if(name == "BLTZ"){
             if(registers[rs] < 0){
-                return address + imm;
+                return address + imm + 4;
             }
             else{
                 return 0;
@@ -117,11 +117,11 @@ using namespace std;
             return 0;
         }
         else if(name == "SLL"){
-            registers[rd] = registers[rt] * 2^imm;
+            registers[rd] = registers[rt] << 2;
             return 0;
         }
         else if(name == "SRL"){
-            registers[rd] = registers[rt] / 2^imm;
+            registers[rd] = registers[rt] >> 2;
             return 0;
         }
         else if(name == "MUL"){
@@ -155,39 +155,43 @@ using namespace std;
         else if(name == "NOP"){
             return 0;
         }
+        return 0;
     }
 
-    void Instruction::print(int cycle, int a){
-        cout << "====================" << endl;
-        cout << "cycle:" + to_string(cycle) + "\t" << to_string(a) + "\t" + printText << endl << endl;
+    string Instruction::print(int cycle, int a){
+        printString = "";
+        printString += "====================\n";
+        printString += "cycle:" + to_string(cycle) + "\t" + to_string(a) + "\t" + printText + "\n\n";
 
         //print registers
-        cout << "registers:" << endl;
-        cout << "r00:\t";
+        printString += "registers:\n";
+        printString += "r00:\t";
         for(int i = 0; i < 32; i++){
            if(i == 8 || i == 16 || i == 24){
-               cout << endl;
+               printString += "\n";
                if(i+1 < 10){
-                   cout << "r0" + to_string(i) + ":\t";
+                   printString += "r0" + to_string(i) + ":\t";
                }
                else{
-                   cout << "r" + to_string(i) + ":\t";
+                   printString += "r" + to_string(i) + ":\t";
                }
            }
-           cout << to_string(registers[i]) + "\t";
+           printString += to_string(registers[i]) + "\t";
         }
 
         //print data values
         int value = 172;
-        cout << endl << endl << "data:" << endl << to_string(value) + ":\t";
+        printString += "\ndata:\n" + to_string(value) + ":\t";
         for(int i = 0; i < 24; i++){
             if((i % 8) == 0 && i != 0){
                 value += 32;
-                cout << endl << to_string(value) + ":\t";
+                printString += "\n" + to_string(value) + ":\t";
             }
-            cout << to_string(dataArray[i]) + "\t";
+            printString += to_string(dataArray[i]) + "\t";
         }
-        cout << endl;
+        printString += "\n";
+
+        return printString;
     }
     
 
