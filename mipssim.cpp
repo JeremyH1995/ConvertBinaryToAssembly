@@ -3,17 +3,11 @@
 #include <iomanip>
 #include <vector>
 #include <string>
-#include <bitset>
 #include <fstream>
 #include <iostream>
 #include "Instruction.cpp"
 
 using namespace std;
-
-
-int getIntValue(bitset<5> bits){
-    return (int)bits.to_ulong();
-}
 
 int main(int argc, char** argv)
 {
@@ -22,13 +16,6 @@ int main(int argc, char** argv)
         int i;
         char * iPtr;
         iPtr = (char*)(void*) &i;
-        bitset<1> validBit;
-        bitset<5> opcodeBits;
-        bitset<5> rsBits;
-        bitset<5> rtBits;
-        bitset<5> rdBits;
-        bitset<5> zeroBits;
-        bitset<6> functionBits;
         int pc = 96;
         string text;
         string lines[200];
@@ -37,11 +24,11 @@ int main(int argc, char** argv)
         Instruction instructionArray[1000];
         string fname;
         
-        if(argc > 1){
-            string filename(argv[1]);
-            fname = filename.substr(0, 4);
+        if(argc > 0){
+            //string filename(argv[1]);
+            //fname = filename.substr(0, 4);
 
-            int FD = open(argv[1], O_RDONLY);
+            int FD = open("test1.bin", O_RDONLY);
             bool b = false;
             int amt = 4;
             while( amt != 0 )
@@ -54,55 +41,28 @@ int main(int argc, char** argv)
                             iPtr[1] = buffer[2];
                             iPtr[2] = buffer[1];
                             iPtr[3] = buffer[0];
-                            bitset<32> bin = bitset<32>((unsigned int)i);
-                            
+                        string binary = to_string(i);
+                        int validBit = (((unsigned int)i)>>31);
+                        int opcode = (((unsigned int)i)>>26);
+                        int rs =  ((((unsigned int)i)<<6)>>27);
+                        int rt = ((((unsigned int)i)<<11)>>27);
+                        int rd = ((((unsigned int)i)<<16)>>27);
+                        int sa = ((((unsigned int)i)<<21)>>27);
+                        int functioncode = ((((unsigned int)i)<<26)>>26);
+                        int jumpVal = ((((unsigned int)i)<<6)>>26) * 4;
+                        int imm = ((((unsigned int)i)<<16)>>16);
+                        cout << to_string(validBit) <<endl;
+                        cout << to_string(opcode) << endl;
 
-                            for(int i = 0; i < 32; i++){
-                                    if(i <= 5)
-                                            functionBits[i] = bin[i];
-                                    else if(i <= 10)
-                                            zeroBits[i - 6] = bin[i]; 
-                                    else if(i <= 15)
-                                            rdBits[i - 11] = bin[i];
-                                    else if(i <= 20)
-                                            rtBits[i - 16] = bin[i];
-                                    else if(i <= 25)
-                                            rsBits[i - 21] = bin[i];
-                                    else if(i <= 30)
-                                            opcodeBits[i - 26] = bin[i];
-                                    else if(i == 31)
-                                            validBit[0] = bin[i];
-                            }
-
-                            int functionDec = (int)functionBits.to_ulong();
-                            int opcodeDec = (int)opcodeBits.to_ulong() + 32;
-
-                            if((int)validBit.to_ulong() == 1){
-                                if(functionDec == 13 && opcodeDec == 32){
+                            if(validBit == 1){
+                                if(functioncode == 13 && opcode == 32){
                                     b = true;
                                     text = "BREAK";
                                     instr = Instruction(text);
                                 }
                                 else{
-                                    int rs, rt, rd, sa, imm = 0;
-                                    int jumpValue = 0;
-                                    rs = getIntValue(rsBits);
-                                    rt = getIntValue(rtBits);
-                                    rd = getIntValue(rdBits);
-                                    sa = getIntValue(zeroBits);
-                                    bitset<16> immBits;
-                                    bitset<26> jumpBits;
-                                    for(int i = 0; i < 16; i++){
-                                        immBits[i] = bin[i];
-                                    }
-                                    imm = (signed short)immBits.to_ulong();
-
-                                    for(int i = 0; i < 26; i++){
-                                        jumpBits[i] = bin[i];
-                                    }
-                                    jumpValue = (int)jumpBits.to_ulong() * 4;
                                     
-                                switch (opcodeDec)
+                                switch (opcode)
                                 {
                                     case 60:
                                     text = "MUL\tR" + to_string(rd) + ", R" + to_string(rs) + ", R" + to_string(rt);
@@ -128,36 +88,36 @@ int main(int argc, char** argv)
                                         break;
 
                                     case 32:
-                                        if(functionDec == 32){
+                                        if(functioncode == 32){
                                             text = "ADD\tR" + to_string(rd) + ", R" + to_string(rs) + ", R" + to_string(rt);
                                             instr = Instruction(text, pc, "ADD", rs, rt, rd, 0);
                                         }
-                                        else if(functionDec == 34){
+                                        else if(functioncode == 34){
                                             text = "SUB\tR" + to_string(rd) + ", R" + to_string(rs) + ", R" + to_string(rt);
                                             instr = Instruction(text, pc, "SUB", rs, rt, rd, 0);
                                         }
-                                        else if(functionDec == 0){
+                                        else if(functioncode == 0){
                                             text = "SLL\tR" + to_string(rd) + ", R" + to_string(rt) + ", #" + to_string(sa);
                                             instr = Instruction(text, pc, "SLL", rs, rt, sa);
                                         }
-                                        else if(functionDec == 8)
+                                        else if(functioncode == 8)
                                         {
                                             text = "JR\tR" + to_string(rs);
                                             instr = Instruction(text, pc, "JR", rs, rt, rd, 0);
                                         }
-                                        else if(functionDec == 2){
+                                        else if(functioncode == 2){
                                             text = "SRL\tR" + to_string(rd) + ", R" + to_string(rt) + ", #" + to_string(sa);
                                             instr = Instruction(text, pc, "SRL", rs, rt, sa);
                                         }
-                                        else if(functionDec == 12){
+                                        else if(functioncode == 12){
                                             text = "MOVZ\tR" + to_string(rd) + ", R" + to_string(rs) + ", R" + to_string(rt);
                                             instr = Instruction(text, pc, "MOVZ", rs, rt, rd, 0);
                                         }
                                         break;
 
                                     case 34:
-                                        text = "J\t#" + to_string(jumpValue);
-                                        instr = Instruction(text, pc, "J", jumpValue);
+                                        text = "J\t#" + to_string(jumpVal);
+                                        instr = Instruction(text, pc, "J", jumpVal);
                                         break;
                                 
                                 default:
@@ -170,7 +130,7 @@ int main(int argc, char** argv)
                                 text = "Invalid Instruction";
                             }
                             
-                            lines[lineCount++] = validBit.to_string() + " " + opcodeBits.to_string() + " " + rsBits.to_string() + " " + rtBits.to_string() + " " + rdBits.to_string() + " " + zeroBits.to_string() + " " + functionBits.to_string() + "\t" + to_string(pc) + "\t\t" + text;
+                            lines[lineCount++] = binary + "\t" + to_string(pc) + "\t" + text;
                             pc += 4;
                             if(b == true){
                                 int value = 0;
@@ -182,10 +142,9 @@ int main(int argc, char** argv)
                                         iPtr[1] = buffer[2];
                                         iPtr[2] = buffer[1];
                                         iPtr[3] = buffer[0];
-                                        bin = bitset<32>((unsigned int)i);
-                                        value = (int)bin.to_ulong();
+                                        value = (int)i;
                                         dataArray[valueCount++] = value;
-                                        lines[lineCount++] = bin.to_string() + "\t\t" + to_string(pc) + "\t\t" + to_string(value);
+                                        lines[lineCount++] = binary + "\t" + to_string(pc) + "\t" + to_string((signed int)i);
                                         pc += 4;
                                     }
                                 }
@@ -223,9 +182,9 @@ int main(int argc, char** argv)
                             }                       
                         }  
                     ofstream outputFile;
-                    fname += "_dis.txt";
-                    const char* openFile = fname.c_str();
-                    outputFile.open(openFile);
+                    //fname += "_dis.txt";
+                    //const char* openFile = fname.c_str();
+                    outputFile.open("test1_dis.txt");
                     for(string line : lines){
                         outputFile << line << endl;
                     }
