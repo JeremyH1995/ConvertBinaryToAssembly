@@ -51,7 +51,7 @@ int main(int argc, char** argv)
                         int sa = ((((unsigned int)i)<<21)>>27);
                         int functioncode = ((((unsigned int)i)<<26)>>26);
                         int jumpVal = ((((unsigned int)i)<<6)>>6) * 4;
-                        int imm = ((((unsigned int)i)<<16)>>16);
+                        int imm = ((((signed int)i)<<16)>>16);
                         string binary = bitset<1>(validBit).to_string() + " " + bitset<5>(opcode).to_string() + " " + bitset<5>(rs).to_string() + " " + bitset<5>(rt).to_string() + " " + bitset<5>(rd).to_string() + " " + bitset<5>(sa).to_string() + " " + bitset<6>(functioncode).to_string() + "\t";
                         string binaryNospace = bitset<32>(i).to_string();
                             if(validBit == 1){
@@ -154,34 +154,8 @@ int main(int argc, char** argv)
             }//end while
 
                     Instruction::fillDataArray(dataArray);
-        
-        
-                    int address = 0;
-                    int count = 1;
-                        for (int i = 100; i < 300; i += 4)
-                        {
-                            try
-                            {
-                                if(instructionArray[i].getName() == "BREAK"){
-                                    instructionArray[i].print(count, i);
-                                    break;
-                                }
-                                if(instructionArray[i].getName() != "NOP"){
-                                    address = instructionArray[i].execute();
-                                    instructionArray[i].print(count, i);
-                                    count++;
-                                    if(address != 0){
-                                        i = address - 4;
-                                        address = 0;
-                                    }
-                                }
-                            }
-                            catch(const std::exception& e)
-                            {
-                                std::cerr << e.what() << '\n';
-                            }                       
-                        }  
-                    ofstream outputFile;
+
+                     ofstream outputFile;
                     //fname += "_dis.txt";
                     //const char* openFile = fname.c_str();
                     outputFile.open("test1_dis.txt");
@@ -189,6 +163,38 @@ int main(int argc, char** argv)
                         outputFile << line << endl;
                     }
                     outputFile.close();
+        
+        
+                    int address = 0;
+                    int count = 1;
+                    string printString = "";
+                    ofstream outFile;
+                    outFile.open("test1_sim.txt");
+                        for (int i = 100; i < 300; i += 4)
+                        {
+                            try
+                            {
+                                if(instructionArray[i].getName() != "NOP"){
+                                    address = instructionArray[i].execute();
+                                    printString = instructionArray[i].print(count, i);
+                                    outFile << printString;
+                                    count++;
+                                    if(address != 0){
+                                        i = address - 4;
+                                        address = 0;
+                                    }
+                                }
+                                if(instructionArray[i + 4].getName() == "BREAK"){
+                                    printString = instructionArray[i + 4].print(count, i);
+                                    outFile << printString;
+                                    break;
+                                }
+                            }
+                            catch(const std::exception& e)
+                            {
+                                std::cerr << e.what() << '\n';
+                            }                       
+                        }                
         }
         else{
             cout << "You must pass in a binary file as an argument" << endl;
